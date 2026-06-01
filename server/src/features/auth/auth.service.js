@@ -126,7 +126,7 @@ export const refreshAccessTokenService = async (incomingRefreshToken) => {
 
 // logout user by clearing refresh token from database
 
-export const logoutUserService = async (userID) => {
+export const logoutUser = async (userID) => {
     // user ID ke basis par user find karo, aur refresh token field bhi select karo taaki usko clear kar sako.
     await User.findByIdAndUpdate(
         userID,

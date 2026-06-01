@@ -34,7 +34,7 @@ export const register = asyncHandler(async (req, res) => {
 
 
 // controller function for user login
-export const login = asynchandler(async (req, res) => {
+export const login = asyncHandler(async (req, res) => {
     const result = await loginUser(req.body); // loginUser service function ko call karo, jo user login logic handle karega, aur result me logged in user data ke sath access/refresh tokens milega.
 
     res
