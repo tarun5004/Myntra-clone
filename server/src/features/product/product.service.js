@@ -31,7 +31,6 @@ const uploadImagesToImageKit = async (files = []) => {
 
 
 // createProduct service function define karo, jo product creation logic handle karega. is function me product details aur uploaded images ko process karke new product create karenge.
-
 // step 1: function ko async banayo, taaki isme asynchronous operations (jaise image upload) handle kar sako.
 // accept karo ek object jisme body (product details), files (uploaded images), aur userId (product creator ka ID) ho. ye parameters controller se pass honge jab product create route hit hoga.
 
@@ -50,5 +49,5 @@ export const createProductService  = async ({body, files, userId}) => {
     createdBy: userId,
     });
 
-    return product; // step 4: created product document return karo, taaki controller me ise response me bhej sako.
+    return product;                              
 }

@@ -7,7 +7,7 @@ const storage = multer.memoryStorage();  //step 1: multer ke storage ko memorySt
 // step 2: fileFilter function define karo, jo multer ko batata hai ki kaunse files accept karni hain aur kaunse reject karni hain. is case me hum sirf image files (jpeg, png, gif) accept kar rahe hain.
 // and ye 3 parameters leta hai: req (request object), file (uploaded file object), aur cb (callback function). agar file valid hai to cb(null, true) call karo, warna cb(new ApiError("Invalid file type", 400), false) call karo.
 
-const fileFilter = (req , res, cb) => {
+const fileFilter = (req ,file, cb) => {
     if (file.mimetype.startsWith('image/')) {   // agar file ka mimetype 'image/' se start hota hai to usse accept karo
         cb(null, true);              // agar file valid hai to cb(null, true) call karo, taaki multer us file ko accept kar le.
     } else {

@@ -6,10 +6,11 @@
 const errorMiddleware = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
 
-  res.status(statusCode).json({
-    success: false,
-    message: err.message || "Internal Server Error"
-  });
+res.status(statusCode).json({
+  success: false,
+  message: err.message || "Internal server error",
+  errors: err.errors || [],   // agar error object me errors property hai to usse include karo response me, warna empty array bhejo. ye errors property validation errors ke liye useful hoti hai, jisme multiple validation errors ho sakte hain.
+});
 };
 
 export default errorMiddleware;

@@ -3,6 +3,7 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 import { cookie } from "express-validator";  
 import cookieparser from "cookie-parser";
 import authRoutes from "./features/auth/auth.routes.js";
+import productRoutes from "./features/product/product.routes.js";
 
 let app = express();
 
@@ -24,8 +25,7 @@ app.get("/health", (req, res) => {
 
 // routes
 app.use("/api/v1/auth", authRoutes); // authentication related routes ke liye authRoutes ko use karo, jisme registration/login/refresh token/logout routes defined hain.
-
-
+app.use("/api/v1/products", productRoutes); // product related routes ke liye productRoutes ko use karo, jisme product creation/update/deletion/fetching routes defined hain.
 
 
 // error middleware
