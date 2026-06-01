@@ -1,5 +1,10 @@
 import asyncHandler from "../../utils/asyncHandler.js";
-import { registerUser } from "./auth.service.js";
+import {
+  registerUser,
+  loginUser,
+  refreshAccessTokenService,
+  logoutUser,
+} from "./auth.service.js";
 import env from "../../config/env.js";
 
 // cookie options for access and refresh tokens
@@ -40,5 +45,38 @@ export const login = asynchandler(async (req, res) => {
       success: true,
       message: "User logged in successfully",
       data: result,
+    });
+});
+
+
+// controller function for refreshing access token
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies?.refreshToken || req.body?.refreshToken;
+
+  const tokens = await refreshAccessTokenService(incomingRefreshToken);
+
+  res
+    .status(200)
+    .cookie("accessToken", tokens.accessToken, cookieOptions)
+    .cookie("refreshToken", tokens.refreshToken, cookieOptions)
+    .json({
+      success: true,
+      message: "Access token refreshed successfully",
+      data: tokens,
+    });
+});
+
+// controller function for user logout
+export const logout = asyncHandler(async (req, res) => {
+  await logoutUser(req.user._id);
+
+  res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json({
+      success: true,
+      message: "User logged out successfully",
     });
 });

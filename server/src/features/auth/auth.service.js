@@ -84,3 +84,59 @@ export const loginUser = async ({ email, password }) => {
     ...tokens,
   };
 };
+
+// refresh access token using refresh token
+
+// refresh token ke basis par access token refresh karne ke liye service function define karo, jisme incoming refresh token ko parameter ke roop me lo, aur usko verify karke naya access token generate karo.
+export const refreshAccessTokenService = async (incomingRefreshToken) => {
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Refresh token is required");
+  }
+// incoming refresh token ko verify karo using jwt.verify, aur agar token valid hai to usme se user ID extract karo. agar token invalid ya expired hai to error throw karo.
+  let decodedToken;
+
+  try {
+    decodedToken = jwt.verify(
+      incomingRefreshToken,
+      env.JWT_REFRESH_SECRET
+    );
+  } catch (error) {
+    throw new ApiError(401, "Invalid or expired refresh token");
+  }
+// decoded token se user ID milne ke baad database me us user ko find karo, 
+// aur refresh token bhi select karo taaki verify kar sako ki incoming refresh token 
+// database me saved refresh token ke sath match karta hai ya nahi. agar user nahi milta ya 
+// refresh token match nahi karta to error throw karo, taaki refresh token reuse/invalid hone
+//  ki situation handle ho sake.
+  const user = await User.findById(decodedToken.id).select("+refreshToken");
+
+  if (!user) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  if (incomingRefreshToken !== user.refreshToken) {
+    throw new ApiError(401, "Refresh token is reused or invalid");
+  }
+
+  const tokens = await generateAccessAndRefreshTokens(user._id);
+
+  return tokens;
+};
+
+
+// logout user by clearing refresh token from database
+
+export const logoutUserService = async (userID) => {
+    // user ID ke basis par user find karo, aur refresh token field bhi select karo taaki usko clear kar sako.
+    await User.findByIdAndUpdate(
+        userID,
+        {
+            $set: {
+                refreshToken: "", // database me saved refresh token ko clear karo, taaki logout hone ke baad refresh token reuse na ho sake.
+            }
+        },
+        {
+            new: true, // updated user document return karo
+        }
+    );
+}
