@@ -1,6 +1,6 @@
 import express from "express";
 import errorMiddleware from "./middlewares/error.middleware.js";
-import { cookie } from "express-validator";
+import { cookie } from "express-validator";  
 import cookieparser from "cookie-parser";
 import authRoutes from "./features/auth/auth.routes.js";
 
@@ -19,8 +19,11 @@ app.get("/health", (req, res) => {
     });
 });
 
+// temporary test route
+
+
 // routes
-app.use("/api/auth", authRoutes); // authentication related routes ke liye authRoutes ko use karo, jisme registration/login/refresh token/logout routes defined hain.
+app.use("/api/v1/auth", authRoutes); // authentication related routes ke liye authRoutes ko use karo, jisme registration/login/refresh token/logout routes defined hain.
 
 
 

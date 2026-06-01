@@ -5,7 +5,7 @@ const validate = (req, res, next) => {
     const errors = validationResult(req);   //it checks the request has any validation errors based on the rules defined 
     // in the route handlers. it returns an object containing the validation errors, if any.
 
-    if (!errors.isEmpty()) {
+    if (errors.isEmpty()) {
         return next();
     }
     
@@ -15,7 +15,7 @@ const validate = (req, res, next) => {
         message: error.msg,
     }));
 
-    return next(ApiError.BadRequest('Validation error', extractedErrors));
+    return next(new ApiError(400, "Validation error", extractedErrors));
 };
 export default validate;
 

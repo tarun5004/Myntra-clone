@@ -13,6 +13,13 @@ import validate from "../../middlewares/validate.middleware.js";
 import { verifyJWT } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
+router.get("/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "Auth routes working",
+  });
+});
+
 
 // register routes with validation and controller functions. registerValidation/loginValidation se validation rules apply karo, validate middleware se validation errors handle karo, aur register/login controller functions se registration/login logic handle karo.
 router.post("/register", registerValidation, validate, register);

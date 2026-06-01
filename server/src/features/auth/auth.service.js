@@ -28,7 +28,7 @@ export const generateAccessAndRefreshTokens = async (userID) => {
 // register user
 export const registerUser = async ({ name, email, password }) => {
     // check if user with the given email already exists
-    const existingUser = await user.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
         throw new ApiError(400, "User with this email already exists");

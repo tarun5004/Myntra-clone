@@ -3,7 +3,7 @@ const asyncHandler = (requestHandler) => {
     // we can use .catch() to handle any errors that may occur during the execution 
     // of the requestHandler.
     return async (req, res, next) => {
-        promise.resolve(requestHandler(req, res, next)).catch(next);
+        Promise.resolve(requestHandler(req, res, next)).catch(next);
     }
 }
 
