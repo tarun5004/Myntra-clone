@@ -22,6 +22,9 @@ export const generateAccessAndRefreshTokens = async (userID) => {
     return { accessToken, refreshToken };
 }
 
+
+
+
 // register user
 export const registerUser = async ({ name, email, password }) => {
     // check if user with the given email already exists
@@ -48,4 +51,36 @@ export const registerUser = async ({ name, email, password }) => {
         user: createdUser,
         ...tokens,
     };
+};
+
+
+
+// login user
+
+export const loginUser = async ({ email, password }) => {
+    // email ke basis par user find karo, aur password/refreshToken field bhi select karo taaki login logic me use kar sako.
+  const user = await User.findOne({ email }).select("+password +refreshToken");
+
+  if (!user) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  if (!user.password) {
+    throw new ApiError(400, "Please login with Google");
+  }
+// compare password method ko call karo, jo user document ke instance method me defined hai, aur password compare karo. ye method bcrypt.compare ka use karke plain text password ko hashed password se compare karega, aur true/false return karega.
+  const isPasswordCorrect = await user.comparePassword(password);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  const tokens = await generateAccessAndRefreshTokens(user._id);
+// access/refresh token generate karne ke baad user document update hoga kyunki refresh token save karna hai, isliye latest user document fetch karo taaki updated refresh token value mile.
+  const loggedInUser = await User.findById(user._id);
+// login successful hone ke baad user data ke sath access/refresh tokens return karo, taaki client side par login state manage kar sako.
+  return {
+    user: loggedInUser,
+    ...tokens,
+  };
 };
