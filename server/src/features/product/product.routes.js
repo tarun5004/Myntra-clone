@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createProduct } from "./product.controller.js";
+import { createProduct, getAllProducts, getProductById } from "./product.controller.js";
 import { createProductValidation } from "./product.validation.js";
 import validate from "../../middlewares/validate.middleware.js";
 import { verifyJWT } from "../../middlewares/auth.middleware.js";
@@ -14,6 +14,20 @@ router.post(
   createProductValidation,        // Validation middleware, jo incoming request body ko validate karega against the defined schema in product.validation.js. agar validation fail hota hai to error response bhejega, warna aage badhne dega.
   validate,                       // Validation result ko check karne wala middleware, jo validation errors ko handle karega aur agar errors hain to appropriate error response bhejega.
   createProduct
-);
+);  
+
+
+router.get("/", getAllProducts); // GET request ke liye route define karo, jo getAllProducts controller function ko call karega, taaki saare products ko client ko return kar sako.
+
+// getProductBYID routes
+router.get("/:id", getProductById); // GET request ke liye route define karo, jisme product ID ko route parameter ke roop me accept karo, aur getProductById controller function ko call karo, taaki specific product ki details ko client ko return kar sako.
+
+
+
+
+
+
+
+
 
 export default router;

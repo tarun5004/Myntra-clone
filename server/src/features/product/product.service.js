@@ -22,10 +22,17 @@ const uploadImagesToImageKit = async (files = []) => {
 
     return uploadedImages.map((img) => img.url); // upload hone ke baad, uploaded images ke URLs return karo, taaki unhe product document me save kar sako.
 }
-
 // Promise = "Result abhi nahi mila, future me milega"
-
 // Promise.all = "Sabka result aane ka wait karo"
+
+
+
+// validate productid helper function to check if the provided product ID is a valid MongoDB ObjectId. agar valid nahi hai to ApiError throw karo, taaki error handling middleware usse handle kar sake.
+const validateProductId = (productId) => {
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        throw new ApiError(400, "Invalid product ID"); // agar productId valid ObjectId nahi hai, to 400 Bad Request error throw karo with message "Invalid product ID", taaki client ko pata chale ki unhone galat ID provide ki hai.
+    }
+};
 
 
 
@@ -50,4 +57,34 @@ export const createProductService  = async ({body, files, userId}) => {
     });
 
     return product;                              
+}
+
+
+// >> getallProducts service function define karo, jo saare products ko database se fetch karega aur return karega. is function me pagination aur filtering logic bhi add karenge taaki large number of products ko efficiently handle kar sako.
+export const getAllProductsService = async (query) => {
+    const filter = {};                                // filter object initialize karo, jisme query parameters ke basis pe filtering criteria set karenge.
+
+    if (query.category) {
+        filter.category = query.category;              // agar query me category parameter hai, to filter object me category field set karo, taaki products ko specified category ke basis pe filter kar sako.
+    }
+
+    // when user not category then return all products
+    const products = await Product.find(filter).sort({ createdAt: -1 }); // filter criteria ke basis pe products ko database se fetch karo using Product.find(filter), aur unhe createdAt field ke descending order me sort karo, taaki latest products pehle aayein.
+
+    return products;                                 // filtered aur sorted products ko return karo, taaki controller me unhe client ko response me bhej sako.
+}
+
+
+
+
+// >> getProductBy id service 
+export const getProductByIdService = async (productId) => {
+    validateProductId(productId); // productId ko validate karo using the validateProductId helper function, taaki ensure kar sako ki provided ID valid hai aur database query me use karne se pehle error throw ho jaye agar ID invalid hai.
+
+    const product = await Product.findById(productId); // database se product ko uske ID ke basis pe fetch karo using Product.findById(productId), taaki specific product ki details mil sake.
+
+    if (!product) {
+        throw new ApiError(404, "Product not found"); // agar product database me nahi milta hai, to 404 Not Found error throw karo with message "Product not found", taaki client ko pata chale ki requested product exist nahi karta.
+    }
+    return product;
 }
