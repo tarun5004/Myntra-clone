@@ -138,7 +138,7 @@ Base URL:
 http://localhost:3000/api/v1
 ```
 
-### Auth
+### Quick Route Summary
 
 | Method | Route | Auth | Description |
 | --- | --- | --- | --- |
@@ -146,17 +146,510 @@ http://localhost:3000/api/v1
 | POST | `/auth/login` | No | Login user |
 | POST | `/auth/refresh-token` | No | Generate fresh tokens |
 | POST | `/auth/logout` | Yes | Logout user |
-
-### Products
-
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
 | GET | `/products` | No | Get all products |
 | GET | `/products?category=electronics` | No | Filter products by category |
 | GET | `/products/:id` | No | Get single product |
 | POST | `/products` | Yes | Create product with optional images |
 | PUT | `/products/:id` | Yes | Update product |
 | DELETE | `/products/:id` | Yes | Delete product |
+
+## Detailed API Reference
+
+### Auth APIs
+
+#### Register User
+
+```txt
+POST /api/v1/auth/register
+```
+
+Authentication: Not required
+
+Request body:
+
+```json
+{
+  "name": "Tarun Raj Gaur",
+  "email": "tarun@example.com",
+  "password": "123456"
+}
+```
+
+Validation:
+
+- `name` is required
+- `email` is required and must be valid
+- `password` is required and must be at least 6 characters
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "name": "Tarun Raj Gaur",
+      "email": "tarun@example.com",
+      "authProvider": "local"
+    },
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token"
+  }
+}
+```
+
+Possible errors:
+
+```json
+{
+  "success": false,
+  "message": "User already exists with this email",
+  "errors": []
+}
+```
+
+Controller responsibility:
+
+- Read request body
+- Call auth service
+- Set auth cookies
+- Send response
+
+Service responsibility:
+
+- Check duplicate email
+- Create user
+- Hash password through model hook
+- Generate and save refresh token
+- Return user and tokens
+
+#### Login User
+
+```txt
+POST /api/v1/auth/login
+```
+
+Authentication: Not required
+
+Request body:
+
+```json
+{
+  "email": "tarun@example.com",
+  "password": "123456"
+}
+```
+
+Validation:
+
+- `email` is required and must be valid
+- `password` is required
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "User logged in successfully",
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "name": "Tarun Raj Gaur",
+      "email": "tarun@example.com"
+    },
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token"
+  }
+}
+```
+
+Possible errors:
+
+```json
+{
+  "success": false,
+  "message": "Invalid email or password",
+  "errors": []
+}
+```
+
+Controller responsibility:
+
+- Read credentials
+- Call login service
+- Set auth cookies
+- Send token response
+
+Service responsibility:
+
+- Find user with password selected
+- Compare password using bcrypt
+- Generate fresh access and refresh tokens
+- Save refresh token in database
+
+#### Refresh Access Token
+
+```txt
+POST /api/v1/auth/refresh-token
+```
+
+Authentication: Refresh token required through cookie or body
+
+Request body:
+
+```json
+{
+  "refreshToken": "jwt_refresh_token"
+}
+```
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Access token refreshed successfully",
+  "data": {
+    "accessToken": "new_jwt_access_token",
+    "refreshToken": "new_jwt_refresh_token"
+  }
+}
+```
+
+Possible errors:
+
+```json
+{
+  "success": false,
+  "message": "Invalid or expired refresh token",
+  "errors": []
+}
+```
+
+Service responsibility:
+
+- Verify refresh token
+- Match incoming refresh token with database token
+- Generate new token pair
+- Save latest refresh token
+
+#### Logout User
+
+```txt
+POST /api/v1/auth/logout
+```
+
+Authentication: Required
+
+Header:
+
+```txt
+Authorization: Bearer <accessToken>
+```
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "User logged out successfully"
+}
+```
+
+Service responsibility:
+
+- Remove refresh token from database
+
+Controller responsibility:
+
+- Clear auth cookies
+- Send logout response
+
+### Product APIs
+
+#### Get All Products
+
+```txt
+GET /api/v1/products
+```
+
+Authentication: Not required
+
+Query params:
+
+| Param | Required | Example | Description |
+| --- | --- | --- | --- |
+| category | No | electronics | Filters products by category |
+
+Example:
+
+```txt
+GET /api/v1/products?category=electronics
+```
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Products fetched successfully",
+  "data": [
+    {
+      "_id": "product_id",
+      "name": "iPhone 15",
+      "description": "Apple phone",
+      "price": 79999,
+      "category": "electronics",
+      "images": [
+        "https://ik.imagekit.io/example/products/iphone.png"
+      ],
+      "createdBy": "user_id"
+    }
+  ]
+}
+```
+
+Service responsibility:
+
+- Build filter object from query params
+- Fetch products from MongoDB
+- Sort latest products first
+
+#### Get Product By ID
+
+```txt
+GET /api/v1/products/:id
+```
+
+Authentication: Not required
+
+Path params:
+
+| Param | Required | Description |
+| --- | --- | --- |
+| id | Yes | MongoDB product ID |
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Product fetched successfully",
+  "data": {
+    "_id": "product_id",
+    "name": "iPhone 15",
+    "description": "Apple phone",
+    "price": 79999,
+    "category": "electronics",
+    "images": [
+      "https://ik.imagekit.io/example/products/iphone.png"
+    ],
+    "createdBy": "user_id"
+  }
+}
+```
+
+Possible errors:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product ID",
+  "errors": []
+}
+```
+
+```json
+{
+  "success": false,
+  "message": "Product not found",
+  "errors": []
+}
+```
+
+Service responsibility:
+
+- Validate MongoDB ObjectId
+- Fetch single product
+- Return 404 if product does not exist
+
+#### Create Product
+
+```txt
+POST /api/v1/products
+```
+
+Authentication: Required
+
+Header:
+
+```txt
+Authorization: Bearer <accessToken>
+```
+
+Content type:
+
+```txt
+multipart/form-data
+```
+
+Form-data fields:
+
+| Field | Type | Required | Example |
+| --- | --- | --- | --- |
+| name | Text | Yes | iPhone 15 |
+| price | Text/Number | Yes | 79999 |
+| category | Text | No | electronics |
+| description | Text | No | Apple phone |
+| images | File | No | image1.png |
+| images | File | No | image2.png |
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Product created successfully",
+  "data": {
+    "_id": "product_id",
+    "name": "iPhone 15",
+    "description": "Apple phone",
+    "price": 79999,
+    "category": "electronics",
+    "images": [
+      "https://ik.imagekit.io/example/products/iphone-15.png"
+    ],
+    "createdBy": "user_id"
+  }
+}
+```
+
+Possible validation error:
+
+```json
+{
+  "success": false,
+  "message": "Validation error",
+  "errors": [
+    {
+      "field": "price",
+      "message": "Product price is required"
+    }
+  ]
+}
+```
+
+Controller responsibility:
+
+- Read `req.body`
+- Read uploaded files from `req.files`
+- Read user ID from `req.user`
+- Call product service
+- Return created product
+
+Service responsibility:
+
+- Upload images to ImageKit
+- Collect ImageKit URLs
+- Save product in MongoDB
+- Attach `createdBy`
+
+#### Update Product
+
+```txt
+PUT /api/v1/products/:id
+```
+
+Authentication: Required
+
+Header:
+
+```txt
+Authorization: Bearer <accessToken>
+```
+
+Content type:
+
+```txt
+multipart/form-data
+```
+
+Allowed fields:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| name | Text | No | Updated product name |
+| price | Text/Number | No | Updated product price |
+| category | Text | No | Updated category |
+| description | Text | No | Updated description |
+| images | File | No | Optional new images |
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Product updated successfully",
+  "data": {
+    "_id": "product_id",
+    "name": "Updated iPhone 15",
+    "description": "Updated description",
+    "price": 74999,
+    "category": "electronics",
+    "images": [
+      "https://ik.imagekit.io/example/products/new-image.png"
+    ]
+  }
+}
+```
+
+Service responsibility:
+
+- Validate product ID
+- Upload new images only if files are provided
+- Update only provided fields
+- Return updated product
+
+#### Delete Product
+
+```txt
+DELETE /api/v1/products/:id
+```
+
+Authentication: Required
+
+Header:
+
+```txt
+Authorization: Bearer <accessToken>
+```
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Product deleted successfully"
+}
+```
+
+Possible errors:
+
+```json
+{
+  "success": false,
+  "message": "Product not found",
+  "errors": []
+}
+```
+
+Service responsibility:
+
+- Validate product ID
+- Delete product from MongoDB
+- Optionally delete images from ImageKit if file IDs are stored later
 
 ## Environment Variables
 
