@@ -88,3 +88,41 @@ export const getProductByIdService = async (productId) => {
     }
     return product;
 }
+
+
+// >> updateProduct Service
+
+export const UpdateProductService = async (productId, body, files) => {
+    console.log("Product ID:", productId);
+    console.log("type of Product ID:", typeof productId);
+    validateProductId(productId); // productId ko validate karo using the validateProductId helper function, taaki ensure kar sako ki provided ID valid hai aur database query me use karne se pehle error throw ho jaye agar ID invalid hai.
+
+    const product = await Product.findById(productId); // database se product ko uske ID ke basis pe fetch karo using Product.findById(productId), taaki specific product ki details mil sake.
+
+    if (!product) {
+        throw new ApiError(404, "Product not found"); // agar product database me nahi milta hai, to 404 Not Found error throw karo with message "Product not found", taaki client ko pata chale ki requested product exist nahi karta.
+    }
+
+    const updateData = {}
+
+  if (body.name !== undefined) updateData.name = body.name;
+  if (body.description !== undefined) updateData.description = body.description;
+  if (body.price !== undefined) updateData.price = body.price;
+  if (body.category !== undefined) updateData.category = body.category;
+
+
+  if (files && files.length > 0) {
+    const imageUrls = await uploadImagesToImageKit(files); // uploaded images ko ImageKit pe upload karo using the helper function, aur unke URLs ko imageUrls variable me store karo.
+    updateData.images = imageUrls; // agar new images upload ki gayi hain, to unke URLs ko updateData object me set karo, taaki product document me updated images save ho jayein.
+  }
+
+  const updatedProduct = await Product.findByIdAndUpdate(
+    productId,
+    updateData,
+    {
+        new: true, // updated document ko return karo, taaki controller me usse client ko response me bhej sako.
+        runValidators: true, // updateData ke against validation rules ko run karo, taaki ensure kar sako ki updated data valid hai.
+    }
+  );
+  return updatedProduct;
+};
