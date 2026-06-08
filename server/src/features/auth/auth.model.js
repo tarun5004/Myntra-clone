@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+
     // database me saved refresh token, taaki logout/refresh flow control ho sake
     refreshToken: {   
       type: String,
@@ -72,20 +79,20 @@ userSchema.methods.generateAccessToken = function () {
         }, 
         env.JWT_ACCESS_SECRET,
         {
-            expiresIn: env.JWT_ACCESS_SECRET_EXPIRES_IN || "15m",
+            expiresIn: env.ACCESS_TOKEN_EXPIRES_IN || "15m",
         }
     );
 };
 
 // instance method to generate refresh token
-userSchema.methods.genrateRefreshToken = function () {
+userSchema.methods.generateRefreshToken = function () {
     return jwt.sign (
         {
             id: this._id,
         },
         env.JWT_REFRESH_SECRET,
         {
-            expiresIn: env.JWT_REFRESH_SECRET_EXPIRES_IN || "7d",
+            expiresIn: env.REFRESH_TOKEN_EXPIRES_IN || "7d",
         }
     )
 }

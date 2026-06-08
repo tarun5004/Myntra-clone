@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 import User from "./auth.model.js";
 import ApiError from "../../utils/ApiError.js";
 import env from "../../config/env.js";
+
+const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 
 // genrate access and refresh token
@@ -13,7 +16,7 @@ export const generateAccessAndRefreshTokens = async (userID) => {
     }
 
     const accessToken = user.generateAccessToken();
-    const refreshToken = user.genrateRefreshToken();
+    const refreshToken = user.generateRefreshToken();
 
     // refresh token ko user document me save karo, taaki future me refresh token verify kar sako.
     user.refreshToken = refreshToken;
@@ -51,6 +54,69 @@ export const registerUser = async ({ name, email, password }) => {
         user: createdUser,
         ...tokens,
     };
+};
+
+
+// google login user
+export const googleLoginUser = async ({ idToken }) => {
+  if (!env.GOOGLE_CLIENT_ID) {
+    throw new ApiError(500, "Google auth is not configured");
+  }
+
+  let payload;
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: env.GOOGLE_CLIENT_ID,
+    });
+
+    payload = ticket.getPayload();
+  } catch (error) {
+    throw new ApiError(401, "Invalid Google token");
+  }
+
+  if (!payload?.email || !payload.email_verified) {
+    throw new ApiError(401, "Google email is not verified");
+  }
+
+  const email = payload.email.toLowerCase();
+
+  let user = await User.findOne({ email }).select("+refreshToken");
+
+  if (!user) {
+    user = await User.create({
+      name: payload.name || email.split("@")[0],
+      email,
+      googleId: payload.sub,
+      avatar: payload.picture || "",
+      authProvider: "google",
+    });
+  } else {
+    let shouldSave = false;
+
+    if (!user.googleId) {
+      user.googleId = payload.sub;
+      shouldSave = true;
+    }
+
+    if (payload.picture && user.avatar !== payload.picture) {
+      user.avatar = payload.picture;
+      shouldSave = true;
+    }
+
+    if (shouldSave) {
+      await user.save({ validateBeforeSave: false });
+    }
+  }
+
+  const tokens = await generateAccessAndRefreshTokens(user._id);
+  const loggedInUser = await User.findById(user._id);
+
+  return {
+    user: loggedInUser,
+    ...tokens,
+  };
 };
 
 

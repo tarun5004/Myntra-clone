@@ -38,3 +38,11 @@ export const loginValidation = [
     .notEmpty()
     .withMessage("Password is required"),
 ];
+
+export const googleLoginValidation = [
+  body("idToken")
+    .notEmpty()
+    .withMessage("Google ID token is required")
+    .isString()
+    .withMessage("Google ID token must be a string"),
+];

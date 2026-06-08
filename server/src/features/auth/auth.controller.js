@@ -1,6 +1,7 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import {
   registerUser,
+  googleLoginUser,
   loginUser,
   refreshAccessTokenService,
   logoutUser,
@@ -44,6 +45,22 @@ export const login = asyncHandler(async (req, res) => {
     .json({
       success: true,
       message: "User logged in successfully",
+      data: result,
+    });
+});
+
+
+// controller function for Google login
+export const googleLogin = asyncHandler(async (req, res) => {
+  const result = await googleLoginUser(req.body);
+
+  res
+    .status(200)
+    .cookie("accessToken", result.accessToken, cookieOptions)
+    .cookie("refreshToken", result.refreshToken, cookieOptions)
+    .json({
+      success: true,
+      message: "Google login successful",
       data: result,
     });
 });
