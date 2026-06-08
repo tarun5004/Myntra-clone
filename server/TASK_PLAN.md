@@ -31,15 +31,16 @@ Completed:
 - Access token and refresh token flow
 - Auth middleware for protected routes
 - Auth routes tested in Postman
-
-Pending:
-
 - Product feature
 - Multer upload middleware
 - Product validation
 - Product documentation
 - Google auth
 - Final testing checklist
+
+Pending:
+
+- Full manual Postman re-test after the latest commits
 
 ## Target Folder Structure
 
@@ -105,11 +106,10 @@ Create `src/middlewares/upload.middleware.js`.
 Use:
 
 - `multer`
-- disk storage
-- destination: `src/uploads/products`
-- filename: unique filename using timestamp/random suffix
+- memory storage
 - image file filter
 - max file size limit
+- ImageKit upload from file buffers
 
 Route usage later:
 
@@ -262,7 +262,7 @@ Test in this order:
 
 ### Step 10: API Documentation
 
-Create `server/API_DOCS.md`.
+Create `server/API_DOCS.md`. Completed.
 
 Document every endpoint with:
 
@@ -287,7 +287,7 @@ Required sections:
 
 ### Step 11: Google Auth
 
-Add only after product CRUD is stable.
+Completed using Google ID token verification.
 
 Plan:
 

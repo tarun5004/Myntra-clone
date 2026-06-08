@@ -144,6 +144,7 @@ http://localhost:3000/api/v1
 | --- | --- | --- | --- |
 | POST | `/auth/register` | No | Register a new user |
 | POST | `/auth/login` | No | Login user |
+| POST | `/auth/google` | No | Login/register with Google ID token |
 | POST | `/auth/refresh-token` | No | Generate fresh tokens |
 | POST | `/auth/logout` | Yes | Logout user |
 | GET | `/products` | No | Get all products |
@@ -288,6 +289,51 @@ Service responsibility:
 - Compare password using bcrypt
 - Generate fresh access and refresh tokens
 - Save refresh token in database
+
+#### Google Login
+
+```txt
+POST /api/v1/auth/google
+```
+
+Authentication: Not required
+
+Request body:
+
+```json
+{
+  "idToken": "google_id_token_from_frontend"
+}
+```
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Google login successful",
+  "data": {
+    "user": {
+      "_id": "user_id",
+      "name": "Tarun Raj Gaur",
+      "email": "tarun@example.com",
+      "googleId": "google_subject_id",
+      "avatar": "https://lh3.googleusercontent.com/avatar.png",
+      "authProvider": "google"
+    },
+    "accessToken": "jwt_access_token",
+    "refreshToken": "jwt_refresh_token"
+  }
+}
+```
+
+Service responsibility:
+
+- Verify Google ID token with Google's official auth client
+- Check verified email from token payload
+- Find or create user
+- Attach Google profile details
+- Issue app access and refresh tokens
 
 #### Refresh Access Token
 
@@ -669,6 +715,8 @@ REFRESH_TOKEN_EXPIRES_IN=7d
 IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
 IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
+
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
 Never commit real `.env` secrets.
@@ -771,23 +819,21 @@ Completed:
 - Environment validation
 - Auth model, service, controller, and routes
 - Access token and refresh token flow
+- Google ID token login
 - Auth middleware
 - Global error handling
 - Request validation system
 - Product model
 - ImageKit and Multer upload foundation
+- Product create, read, update, and delete APIs
 
 In progress:
 
-- Product create endpoint
-- Product CRUD service/controller/routes
 - Product API testing
 - API documentation
 
 Planned:
 
-- Google authentication
-- Final endpoint documentation
 - Full Postman test checklist
 
 ## Development Notes
@@ -818,3 +864,9 @@ server/TASK_PLAN.md
 ```
 
 Use it as the source of truth while building the remaining features.
+
+Full endpoint documentation lives here:
+
+```txt
+server/API_DOCS.md
+```
