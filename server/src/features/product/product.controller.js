@@ -1,6 +1,12 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import ApiResponse from "../../utils/ApiResponse.js";
-import { createProductService, getAllProductsService, getProductByIdService, UpdateProductService } from "./product.service.js";
+import {
+  createProductService,
+  deleteProductService,
+  getAllProductsService,
+  getProductByIdService,
+  updateProductService,
+} from "./product.service.js";
 
 export const createProduct = asyncHandler(async (req, res) => {
   const product = await createProductService({
@@ -40,7 +46,7 @@ export const getProductById = asyncHandler (async (req, res) => {
 
 // updateProduct Controller
 export const updateProduct = asyncHandler(async (req, res) => {
-  const product = await UpdateProductService({
+  const product = await updateProductService({
     productId: req.params.id,
     body: req.body,
     files: req.files,
@@ -49,4 +55,14 @@ export const updateProduct = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, product, "Product updated successfully"));
+});
+
+
+// deleteProduct Controller
+export const deleteProduct = asyncHandler(async (req, res) => {
+  await deleteProductService(req.params.id);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Product deleted successfully"));
 });

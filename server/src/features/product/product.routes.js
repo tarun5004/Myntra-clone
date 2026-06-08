@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createProduct, getAllProducts, getProductById, updateProduct } from "./product.controller.js";
+import { createProduct, deleteProduct, getAllProducts, getProductById, updateProduct } from "./product.controller.js";
 import { createProductValidation, updateProductValidation } from "./product.validation.js";
 import validate from "../../middlewares/validate.middleware.js";
 import { verifyJWT } from "../../middlewares/auth.middleware.js";
@@ -33,7 +33,12 @@ router.put(
 );
 
 
-
+// delete product route
+router.delete(
+  "/:id",
+  verifyJWT,
+  deleteProduct
+);
 
 
 

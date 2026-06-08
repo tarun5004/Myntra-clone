@@ -11,7 +11,7 @@ const fileFilter = (req ,file, cb) => {
     if (file.mimetype.startsWith('image/')) {   // agar file ka mimetype 'image/' se start hota hai to usse accept karo
         cb(null, true);              // agar file valid hai to cb(null, true) call karo, taaki multer us file ko accept kar le.
     } else {
-        cb(new ApiError("Invalid file type. Only image files are allowed.", 400), false);
+        cb(new ApiError(400, "Invalid file type. Only image files are allowed."), false);
     }
 }
 

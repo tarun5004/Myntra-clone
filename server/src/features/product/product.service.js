@@ -65,7 +65,7 @@ export const getAllProductsService = async (query) => {
     const filter = {};                                // filter object initialize karo, jisme query parameters ke basis pe filtering criteria set karenge.
 
     if (query.category) {
-        filter.category = query.category;              // agar query me category parameter hai, to filter object me category field set karo, taaki products ko specified category ke basis pe filter kar sako.
+        filter.category = query.category.toLowerCase();              // agar query me category parameter hai, to filter object me category field set karo, taaki products ko specified category ke basis pe filter kar sako.
     }
 
     // when user not category then return all products
@@ -92,9 +92,7 @@ export const getProductByIdService = async (productId) => {
 
 // >> updateProduct Service
 
-export const UpdateProductService = async (productId, body, files) => {
-    console.log("Product ID:", productId);
-    console.log("type of Product ID:", typeof productId);
+export const updateProductService = async ({ productId, body, files }) => {
     validateProductId(productId); // productId ko validate karo using the validateProductId helper function, taaki ensure kar sako ki provided ID valid hai aur database query me use karne se pehle error throw ho jaye agar ID invalid hai.
 
     const product = await Product.findById(productId); // database se product ko uske ID ke basis pe fetch karo using Product.findById(productId), taaki specific product ki details mil sake.
@@ -125,4 +123,19 @@ export const UpdateProductService = async (productId, body, files) => {
     }
   );
   return updatedProduct;
+};
+
+
+// >> deleteProduct Service
+
+export const deleteProductService = async (productId) => {
+    validateProductId(productId);
+
+    const product = await Product.findByIdAndDelete(productId);
+
+    if (!product) {
+        throw new ApiError(404, "Product not found");
+    }
+
+    return product;
 };
