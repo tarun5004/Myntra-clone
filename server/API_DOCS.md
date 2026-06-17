@@ -155,6 +155,14 @@ Errors:
 }
 ```
 
+```json
+{
+  "success": false,
+  "message": "Google auth is not configured",
+  "errors": []
+}
+```
+
 ### Refresh Token
 
 ```txt
@@ -450,6 +458,8 @@ IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
 GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
+
+`GOOGLE_CLIENT_ID` is required only for `POST /auth/google`. Without it, the route returns a configuration error while the rest of the API can still run.
 
 ## Testing Checklist
 

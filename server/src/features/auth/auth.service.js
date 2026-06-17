@@ -4,7 +4,13 @@ import User from "./auth.model.js";
 import ApiError from "../../utils/ApiError.js";
 import env from "../../config/env.js";
 
-const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+const getGoogleClient = () => {
+  if (!env.GOOGLE_CLIENT_ID) {
+    throw new ApiError(503, "Google auth is not configured");
+  }
+
+  return new OAuth2Client(env.GOOGLE_CLIENT_ID);
+};
 
 
 // genrate access and refresh token
@@ -59,11 +65,8 @@ export const registerUser = async ({ name, email, password }) => {
 
 // google login user
 export const googleLoginUser = async ({ idToken }) => {
-  if (!env.GOOGLE_CLIENT_ID) {
-    throw new ApiError(500, "Google auth is not configured");
-  }
-
   let payload;
+  const googleClient = getGoogleClient();
 
   try {
     const ticket = await googleClient.verifyIdToken({

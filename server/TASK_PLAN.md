@@ -33,6 +33,7 @@ Completed:
 - Auth routes tested in Postman
 - Product feature
 - Multer upload middleware
+- Static upload serving
 - Product validation
 - Product documentation
 - Google auth
@@ -40,7 +41,7 @@ Completed:
 
 Pending:
 
-- Full manual Postman re-test after the latest commits
+- Full manual Postman re-test after the latest commits, including Google login after `GOOGLE_CLIENT_ID` is configured
 
 ## Target Folder Structure
 
