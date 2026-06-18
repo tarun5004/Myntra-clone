@@ -50,6 +50,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
     productId: req.params.id,
     body: req.body,
     files: req.files,
+    userId: req.user._id,
   });
 
   return res
@@ -60,7 +61,10 @@ export const updateProduct = asyncHandler(async (req, res) => {
 
 // deleteProduct Controller
 export const deleteProduct = asyncHandler(async (req, res) => {
-  await deleteProductService(req.params.id);
+  await deleteProductService({
+    productId: req.params.id,
+    userId: req.user._id,
+  });
 
   return res
     .status(200)
