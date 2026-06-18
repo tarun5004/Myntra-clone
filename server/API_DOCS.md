@@ -230,11 +230,13 @@ Query params:
 | Name | Required | Description |
 | --- | --- | --- |
 | category | No | Filters products by category |
+| page | No | Page number used when `limit` is provided |
+| limit | No | Maximum products to return, capped at 100 |
 
 Example:
 
 ```txt
-GET /products?category=electronics
+GET /products?category=electronics&limit=20&page=1
 ```
 
 Success:
@@ -313,7 +315,7 @@ Errors:
 POST /products
 ```
 
-Auth: Required
+Auth: Required. Only the product creator can update the product.
 
 Header:
 
@@ -414,7 +416,7 @@ Success:
 DELETE /products/:id
 ```
 
-Auth: Required
+Auth: Required. Only the product creator can delete the product.
 
 Header:
 

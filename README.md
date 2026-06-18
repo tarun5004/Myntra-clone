@@ -148,11 +148,11 @@ http://localhost:3000/api/v1
 | POST | `/auth/refresh-token` | No | Generate fresh tokens |
 | POST | `/auth/logout` | Yes | Logout user |
 | GET | `/products` | No | Get all products |
-| GET | `/products?category=electronics` | No | Filter products by category |
+| GET | `/products?category=electronics&limit=20&page=1` | No | Filter and paginate products |
 | GET | `/products/:id` | No | Get single product |
 | POST | `/products` | Yes | Create product with optional images |
-| PUT | `/products/:id` | Yes | Update product |
-| DELETE | `/products/:id` | Yes | Delete product |
+| PUT | `/products/:id` | Yes | Update owned product |
+| DELETE | `/products/:id` | Yes | Delete owned product |
 
 ## Detailed API Reference
 
