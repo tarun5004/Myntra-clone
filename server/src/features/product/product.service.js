@@ -42,6 +42,12 @@ const ensureProductOwner = (product, userId) => {
     }
 };
 
+const parsePositiveInteger = (value) => {
+    const parsedValue = Number.parseInt(value, 10);
+
+    return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
+};
+
 
 
 
@@ -73,13 +79,21 @@ export const getAllProductsService = async (query) => {
     const filter = {};                                // filter object initialize karo, jisme query parameters ke basis pe filtering criteria set karenge.
 
     if (query.category) {
-        filter.category = query.category.toLowerCase();              // agar query me category parameter hai, to filter object me category field set karo, taaki products ko specified category ke basis pe filter kar sako.
+        filter.category = query.category.trim().toLowerCase();              // agar query me category parameter hai, to filter object me category field set karo, taaki products ko specified category ke basis pe filter kar sako.
     }
 
-    // when user not category then return all products
-    const products = await Product.find(filter).sort({ createdAt: -1 }); // filter criteria ke basis pe products ko database se fetch karo using Product.find(filter), aur unhe createdAt field ke descending order me sort karo, taaki latest products pehle aayein.
+    const page = parsePositiveInteger(query.page) || 1;
+    const requestedLimit = parsePositiveInteger(query.limit);
+    const limit = requestedLimit ? Math.min(requestedLimit, 100) : null;
 
-    return products;                                 // filtered aur sorted products ko return karo, taaki controller me unhe client ko response me bhej sako.
+    // when user not category then return all products
+    const productQuery = Product.find(filter).sort({ createdAt: -1 }); // filter criteria ke basis pe products ko database se fetch karo using Product.find(filter), aur unhe createdAt field ke descending order me sort karo, taaki latest products pehle aayein.
+
+    if (limit) {
+        productQuery.skip((page - 1) * limit).limit(limit);
+    }
+
+    return await productQuery;                                 // filtered aur sorted products ko return karo, taaki controller me unhe client ko response me bhej sako.
 }
 
 
