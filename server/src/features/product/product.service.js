@@ -34,6 +34,14 @@ const validateProductId = (productId) => {
     }
 };
 
+const ensureProductOwner = (product, userId) => {
+    if (!product.createdBy) return;
+
+    if (product.createdBy.toString() !== userId.toString()) {
+        throw new ApiError(403, "You are not allowed to modify this product");
+    }
+};
+
 
 
 
@@ -92,7 +100,7 @@ export const getProductByIdService = async (productId) => {
 
 // >> updateProduct Service
 
-export const updateProductService = async ({ productId, body, files }) => {
+export const updateProductService = async ({ productId, body, files, userId }) => {
     validateProductId(productId); // productId ko validate karo using the validateProductId helper function, taaki ensure kar sako ki provided ID valid hai aur database query me use karne se pehle error throw ho jaye agar ID invalid hai.
 
     const product = await Product.findById(productId); // database se product ko uske ID ke basis pe fetch karo using Product.findById(productId), taaki specific product ki details mil sake.
@@ -100,6 +108,8 @@ export const updateProductService = async ({ productId, body, files }) => {
     if (!product) {
         throw new ApiError(404, "Product not found"); // agar product database me nahi milta hai, to 404 Not Found error throw karo with message "Product not found", taaki client ko pata chale ki requested product exist nahi karta.
     }
+
+    ensureProductOwner(product, userId);
 
     const updateData = {}
 
@@ -128,14 +138,18 @@ export const updateProductService = async ({ productId, body, files }) => {
 
 // >> deleteProduct Service
 
-export const deleteProductService = async (productId) => {
+export const deleteProductService = async ({ productId, userId }) => {
     validateProductId(productId);
 
-    const product = await Product.findByIdAndDelete(productId);
+    const product = await Product.findById(productId);
 
     if (!product) {
         throw new ApiError(404, "Product not found");
     }
+
+    ensureProductOwner(product, userId);
+
+    await product.deleteOne();
 
     return product;
 };
