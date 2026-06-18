@@ -3,13 +3,20 @@ import User from "../features/auth/auth.model.js";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import env from "../config/env.js";
+
+const extractBearerToken = (authorizationHeader = "") => {
+  const match = authorizationHeader.match(/^Bearer\s+(.+)$/i);
+
+  return match?.[1]?.trim();
+};
+
 // authentication middleware to verify JWT access token and attach user to request object
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   const token =
     req.cookies?.accessToken ||
     // authorization header me token aata hai, jiska format hota hai "Bearer <token>".
     // mean if authorization header exist karta hai to usme se token part ko extract karo, otherwise token undefined ho jayega.
-    req.header("Authorization")?.replace("Bearer ", "");
+    extractBearerToken(req.header("Authorization"));
 
   if (!token) {
     throw new ApiError(401, "Unauthorized request");
